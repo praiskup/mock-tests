@@ -41,11 +41,15 @@ for config in /etc/mock/*.cfg ; do
         continue
     fi
 
-    if ! mock -r "$chroot" --rebuild "$package"; then
-        result_line "$chroot - build failed"
-    else
-        result_line "$chroot - OK"
-    fi
+    for option in --no-bootstrap-chroot --bootstrap-chroot; do
+        if ! mock -r "$chroot" --rebuild "$package" $option; then
+            result_line "$chroot - build failed ($option)"
+            # don't continue to not waste the time
+            break
+        else
+            result_line "$chroot - OK ($option)"
+        fi
+    done
 
     mock -r "$chroot" --scrub all
 done
